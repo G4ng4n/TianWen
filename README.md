@@ -4,8 +4,6 @@
 
 ## TODO
 
-### CSAPP
-
 - 第四章视频
 - attack lab补全
 
