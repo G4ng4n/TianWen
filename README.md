@@ -4,8 +4,8 @@
 
 ## TODO
 
-- 第四章视频
 - attack lab补全
+- archlab做完
 
 ## 目录
 
