@@ -578,3 +578,5 @@ Congratulations! You've defused the bomb!
 ## attacklab
 
 没难度，基础pwn题，不写笔记了（逃
+
+- 最后一个phase有点绕，抠了半天搞出来的ROP居然有bug，后来发现是找错了ROP（把获取rsp的gadget找成了获取esp的），裂开
