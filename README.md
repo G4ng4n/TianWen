@@ -6,7 +6,8 @@
 
 - archlab part C
 - IEEE 754笔记
-- 流水线优化问题
+- 流水线、优化
+- malloc lab、proxy lab
 
 ## 目录
 
@@ -20,8 +21,8 @@
 ### CSAPP
 
 - 20210131：bomblab，datalab
-- 20210203：attacklab补全
-- 20210204：
+- 20210203：attacklab补全、archlab剩余part C
+- 20210204：shelllab
 
 ### AFL
 

@@ -580,3 +580,24 @@ Congratulations! You've defused the bomb!
 没难度，基础pwn题，不写笔记了（逃
 
 - 最后一个phase有点绕，抠了半天搞出来的ROP居然有bug，后来发现是找错了ROP（把获取rsp的gadget找成了获取esp的），裂开
+
+## archlab
+
+- part A就是简单的汇编程序
+- part B就是按fetch、decode、execute、memory、write back、这几个阶段实现一个iaddq，很简单，框架都是现成的。
+- part C很难，需要解决流水线的数据冒险，同时考虑到各种优化问题，需要把第四章后半部分和第五章都搞定，这个等其他lab做完了再回来研究。
+
+## cachelab
+
+- 待做
+
+## shlab
+
+- 仔细看好实验要求，把书过一遍，就能很快完成编码。
+- 但还是遇到了一个bug，找了一个晚上，发现是eval中`sigprocmask(SIG_UNBLOCK, &set, NULL);`的`SIG_UNBLOCK`被用成了`SIG_SETMASK`，因为之前有bug的时候参考了一些文章，当时以为其他bug是由于UNBLOCK引起的，所以事先把这里修改了。从名字上看不应该犯这个错误。尤其是找了一个大晚上，很伤。
+  - bug会表现为在fg执行的命令会一直阻塞下去
+- 应该还有点小bug，比如输出内容和参考内容有些不一致这些，没能一遍写出来还是代码能力太差，这个实验一共也就写了200行左右。剩下的不准备搞了，毕竟实验目的是学习异常控制流的东西，再纠结细节下去太浪费时间，时间很宝贵。
+
+## malloc
+
+## proxy

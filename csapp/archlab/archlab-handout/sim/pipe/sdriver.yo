@@ -81,10 +81,10 @@
                             | ###############################
 0x078:                      | 	.align 8
 0x078:                      | src:
-0x078: ffffffffffffffff     | 	.quad -1
+0x078: 0100000000000000     | 	.quad 1
 0x080: 0200000000000000     | 	.quad 2
 0x088: fdffffffffffffff     | 	.quad -3
-0x090: 0400000000000000     | 	.quad 4
+0x090: fcffffffffffffff     | 	.quad -4
 0x098: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
                             | 
 0x0a0:                      | 	.align 16

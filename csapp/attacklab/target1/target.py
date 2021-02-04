@@ -68,9 +68,7 @@ def run():
         usage()
     p = process(argv=[pro, '-q'])
 
-    input()
-
-    p.sendline(payload)
+    p.sendline(int(payload))
     p.interactive()
     # p.close()
 
