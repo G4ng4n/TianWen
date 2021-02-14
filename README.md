@@ -8,7 +8,6 @@
 - IEEE 754笔记
 - 流水线、优化
 - cachelab
-- malloc lab
 - proxy lab
 
 ## 目录
