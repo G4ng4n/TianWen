@@ -28,3 +28,12 @@ archlab的环境在part C又出了问题，明天再看一下，再因为环境�
 - 20210206
 
 串门、上坟、换掉了快四年已经卡得不行的手机，今天没有学习。明天提交第一次csapp学习进度，截止到现在，还差cachelab、malloclab、proxylab，以及archlab的part C没有完成，下周预计的顺序是malloclab、proxylab、part C、cachelab。有点头疼毕设的事情，最晚最晚年后要开始做了，二月份预计完成毕设的代码部分，再改一下开题报告，既然这些听毕设的老师从不关注技术问题而是希望得到一份漂亮的报告，那就这么做吧，真心希望以后自己能少遇到一些这样的事情。
+
+- 20210219
+
+快两周才慢慢从过年状态恢复。搞定了cachelab的part A，昨天搞定了archlab遗留的part C，还剩proxy lab以及改进malloc lab。
+研究了一下ETW和AMSI，感觉还有好多课要补，这部分准备写一点笔记，也方便以后补写毕设日志（欠账还在积累中
+
+- 20210220
+
+搞定了cachelab，对malloc进行了一个简单的改进（first-fit换成next-fit），写了一个思考题

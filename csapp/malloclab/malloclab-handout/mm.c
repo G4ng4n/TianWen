@@ -81,6 +81,7 @@ static void replace(void* bp, size_t asize);
 
 
 static char *heap_listp; // 指向freed list的第一个chunk
+static char *last_free;
 
 /* 
  * mm_init - initialize the malloc package.
@@ -94,6 +95,8 @@ int mm_init(void)
     PUT(heap_listp + (2 * WSIZE), PACK(DSIZE, 1)); //prologue footer
     PUT(heap_listp + (3 * WSIZE), PACK(0, 1)); //epilogue header
     heap_listp += (2 * WSIZE);
+
+    last_free = heap_listp;
 
     if (!extend_heap(CHUNKSIZE/WSIZE))
         return -1;
@@ -148,7 +151,7 @@ static void* coalesce(void *bp)
         PUT(FTRP(NEXT_BLKP(bp)), PACK(size, 0));
         bp = PREV_BLKP(bp);
     }
-
+    last_free = (char *)bp;
     return bp;
 }
 
@@ -183,6 +186,17 @@ static void *first_fit(size_t chunk_size){
     return NULL;
 }
 
+static void *next_fit(size_t chunk_size){
+    // printf("call next_fit!\n");
+    
+    for (char* bp = last_free; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)){
+        if (!GET_ALLOC(HDRP(bp)) && GET_SIZE(HDRP(bp)) >= chunk_size){
+            return bp;
+        }
+    }
+    return NULL;
+}
+
 /* 
  * mm_malloc - Allocate a block by incrementing the brk pointer.
  *     Always allocate a block whose size is a multiple of the alignment.
@@ -201,7 +215,7 @@ void *mm_malloc(size_t size)
     else
         asize = DSIZE * ((size + (DSIZE) + (DSIZE - 1)) / DSIZE);
 
-    if ((bp = first_fit(asize))){
+    if ((bp = next_fit(asize))){
         replace(bp, asize);
         return bp;
     }

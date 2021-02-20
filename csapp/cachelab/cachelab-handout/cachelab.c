@@ -64,8 +64,6 @@ void correctTrans(int M, int N, int A[N][M], int B[M][N])
     }    
 }
 
-
-
 /* 
  * registerTransFunction - Add the given trans function into your list
  *     of functions to be tested
