@@ -244,7 +244,6 @@ static void replace(void* bp, size_t new_size){
 
 void mm_free(void *ptr)
 {
-    // printf("free ptr at %p\n", ptr);
     size_t size = GET_SIZE((HDRP(ptr)));
     // 设置标志位
     PUT(HDRP(ptr), PACK(size, 0));

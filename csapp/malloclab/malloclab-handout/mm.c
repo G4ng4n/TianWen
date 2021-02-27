@@ -271,19 +271,25 @@ void *mm_realloc(void *ptr, size_t size)
 
 void *mm_malloc(size_t size)
 {
-    size_t asize, i;
-    size_t extend_size;
-    char *bp = NULL;
+    size_t asize; // 实际需要的大小（对齐、最小块）
+    size_t extend_size; // no fit申请新的空间大小
+    char* bp = NULL; // 返回的指针
     char* list = NULL;
+
     if (size == 0) return NULL;
-    
+
+    // 1.搜索bins
+    int bin_num = 0;
     asize = DSIZE * ((size + (DSIZE) + (DSIZE - 1)) / DSIZE);
-    int bin_num;
+    size_t i;
+
+    // 2.选择对应大小范围的bin
 
     for(i = asize, bin_num=0; bin_num<BINS_NUM; bin_num++, i>>=1){
         // 3.first-fit找到合适大小的chunk
         // 首先简单判断筛选大致范围
         if((i>1) || bins[bin_num] == NULL) continue;
+        
         for(list = bins[bin_num]; list; list=BK(list)){
             if(GET_SIZE(HDRP(list)) < asize) continue;
             bp = list;
@@ -291,10 +297,11 @@ void *mm_malloc(size_t size)
         }
         if(bp) break;
     }
-
-    if (!bp) {
-        extend_size = MAX(asize,CHUNKSIZE);
-        if ((bp = extend_heap(extend_size/WSIZE)) == NULL)
+    
+    if(!bp){
+        // 未发现适合回收的空闲内存，开辟新的堆内存
+        extend_size = MAX(asize, CHUNKSIZE);
+        if ((bp = extend_heap(extend_size / WSIZE)) == NULL)
             return NULL;
     }
     replace(bp, asize);
