@@ -718,6 +718,67 @@ Total          70%  112372  0.083429  1347
 Perf index = 42 (util) + 40 (thru) = 82/100
 ```
 
+### 改写
+
+- 按分离适配（伙伴系统）的方式设置16个bin，按范围排列16个链表，插入时按从小到大排序
+- `malloc`中此处代码出现问题：
+
+```c
+// 2.选择对应大小范围的bin
+for(i = asize; i>1 && bin_num<BINS_NUM-1; i>>=1){
+    bin_num++;
+}
+
+// 3.first-fit找到合适大小的chunk
+for(list = bins[bin_num]; list!= NULL; list=BK(list)){
+    if(GET_SIZE(HDRP(list)) < asize) continue;
+    bp = list;
+    break;
+}
+```
+
+这里忘记了当对应合适大小的bin找不到所需块时，向后续bin继续寻找，导致出现问题，简单修改后如下：
+
+```c
+// 2.选择对应大小范围的bin
+for(i = asize, bin_num=0; i>1 && bin_num<BINS_NUM-1; i>>=1){
+    // 3.first-fit找到合适大小的chunk
+    for(list = bins[bin_num]; list!= NULL; list=BK(list)){
+        if(GET_SIZE(HDRP(list)) < asize) continue;
+        bp = list;
+        break;
+    }
+    bin_num++;
+    if(bp) break;
+}
+```
+
+这里运行traces的第一个评测文件只能得到50分，看了一下问题出在for的i>1上，这个检查应当放到循环体内
+
+```c
+for(i = asize, bin_num=0; bin_num<BINS_NUM; bin_num++, i>>=1){
+    if((i>1) || bins[bin_num] == NULL) continue;
+    for(list = bins[bin_num]; list; list=BK(list)){
+        if(GET_SIZE(HDRP(list)) < asize) continue;
+        bp = list;
+        break;
+    }
+    if(bp) break;
+}
+```
+
+学了两天windows驱动，`realloc-bal.rep`总有点问题，`realloc2-bal.rep`却没问题。。。有bug导致内存泄露=-=
+试着改了一下realloc结果还出现了分配内存重叠，没太多时间调试，哭
+最后就先跳过了有问题的trace file然后跑了一下分数
+
+```sh
+root@0435fe0fdd6e:/ctf/work/TianWen/csapp/malloclab/malloclab-handout# ./mdriver -t ./traces/ -a
+Using default tracefiles in ./traces/
+Perf index = 47 (util) + 40 (thru) = 87/100
+```
+
+- 欠的账总是要还的，哭
+
 ## proxy
 
 ## 思考题：程序载入内存

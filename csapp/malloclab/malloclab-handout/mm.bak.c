@@ -6,7 +6,7 @@
  * footers.  Blocks are never coalesced or reused. Realloc is
  * implemented directly using mm_malloc and mm_free.
  *
- * NOTE TO STUDENTS: Rereplace this header comment with your own header
+ * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
  */
 #include <stdio.h>
@@ -39,56 +39,53 @@ team_t team = {
 #define ALIGNMENT 8
 
 /* rounds up to the nearest multiple of ALIGNMENT */
-
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~0x7)
+#define SIZE_T_SIZE (ALIGN(sizeof(size_t)))
 
-#define BINS_NUM 16
+// 书中给出的一些宏，用于操作freelist
+// 带footer和header的chunk
 
-/* Basic constants and macros */
-#define WSIZE 4 /* Word and header/footer size (bytes) */
-#define DSIZE 8 /* Double word size (bytes) */
+#define WSIZE 4
+#define DSIZE 8
 #define CHUNKSIZE (1<<12) /* Extend heap by this amount (bytes) */
-#define MINCHUNKSIZE 32
+#define MINCHUNKSIZE (4*WSIZE) // chunk最小为4*字长
 
-#define MAX(x, y) ((x) > (y)? (x) : (y))
-#define MIN(x, y) ((x) < (y)? (x) : (y))
-/* Pack a size and allocated bit into a word */
-#define PACK(size, alloc) ((size) | (alloc))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define PACK(size, alloc) ((size) | (alloc)) /* Pack a size and allocated bit into a word */
 
-/* Read and write a word at address p */
-#define GET(p) (*(unsigned int *)(p))
-#define PUT(p, val) (*(unsigned int *)(p) = (val))
-
-/* Read the size and allocated fields from address p */
-#define GET_SIZE(p) (GET(p) & ~0x7)
-#define GET_ALLOC(p) (GET(p) & 0x1)
-
-/* Given block ptr bp, compute address of its header and footer */
-#define HDRP(bp) ((char *)(bp) - WSIZE)
-#define FTRP(bp) ((char *)(bp) + GET_SIZE(HDRP(bp)) - DSIZE)
-
-/* Given block ptr bp, compute address of next and t_listvious blocks */
-#define NEXT_BLKP(bp) ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))
-#define PREV_BLKP(bp) ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))
-
-/* for explict linkedlist */
-#define FDP(ptr) ((char *)(ptr))
-#define BKP(ptr) ((char *)(ptr) + WSIZE)
-
-#define FD(ptr) (*(char **)(ptr))
-#define BK(ptr) (*(char **)(BKP(ptr)))
-
+#define GET(p)            (*(unsigned int *)(p))
+#define PUT(p, val)       (*(unsigned int *)(p) = (val))
 
 #define SET_PTR(p, ptr) (*(unsigned int *)(p) = (unsigned int)(ptr))
 
-static void *extend_heap(size_t words);
-static void replace(void *bp, size_t asize);
-static void *coalesce(void *bp);
-static void insert(void *bp, size_t size);
-static void delete(void *bp);
-void *bins[BINS_NUM];
-char *heap_listp;
+#define GET_SIZE(p)  (GET(p) & ~0x7)
+#define GET_ALLOC(p) (GET(p) & 0x1)
 
+#define HDRP(ptr) ((char *)(ptr) - WSIZE)
+#define FTRP(ptr) ((char *)(ptr) + GET_SIZE(HDRP(ptr)) - DSIZE)
+#define FDP(ptr) ((char*)(ptr))
+#define BKP(ptr) ((char*)(ptr) + WSIZE)
+#define FD(ptr) ((char*)(*FDP(ptr)))
+#define BK(ptr) ((char*)(*BKP(ptr)))
+
+#define NEXT_BLKP(ptr) ((char *)(ptr) + GET_SIZE((char *)(ptr) - WSIZE))
+#define PREV_BLKP(ptr) ((char *)(ptr) - GET_SIZE((char *)(ptr) - DSIZE))
+
+static void* extend_heap(size_t words);
+static void* coalesce(void *bp);
+static void replace(void* bp, size_t asize);
+static void insert(void* bp, size_t size);
+static void delete(void* bp);
+static void print_bins();
+static char *heap_listp; // 指向freed list的第一个chunk
+#define BINS_NUM 10
+
+// 16 32 64 128 256 512 1024 2048 4096 INF
+static void* bins[BINS_NUM]; 
+
+/* 
+ * mm_init - initialize the malloc package.
+ */
 int mm_init(void)
 {
     int i;
@@ -194,6 +191,7 @@ static void delete(void* bp){
     }
 }
 
+// 检查物理相邻chunk，free则合并
 static void* coalesce(void *bp)
 {
     size_t prev = GET_ALLOC(HDRP(PREV_BLKP(bp)));
@@ -226,10 +224,11 @@ static void* coalesce(void *bp)
     insert(bp, size);
 }
 
+// 在找到的freed chunk中重新设置新块的header和footer，以及相关的alloc位
 static void replace(void* bp, size_t new_size){
     size_t old_size = GET_SIZE(HDRP(bp));
     delete(bp); // 从freelist中先删除chunk
-    if(old_size-new_size < (1<<5)){
+    if(old_size-new_size < MINCHUNKSIZE){
         // 剩余大小不足以分割新的freed chunk
         PUT(HDRP(bp),PACK(old_size,1));
         PUT(FTRP(bp),PACK(old_size,1));
@@ -245,6 +244,7 @@ static void replace(void* bp, size_t new_size){
 
 void mm_free(void *ptr)
 {
+    // printf("free ptr at %p\n", ptr);
     size_t size = GET_SIZE((HDRP(ptr)));
     // 设置标志位
     PUT(HDRP(ptr), PACK(size, 0));
@@ -271,19 +271,25 @@ void *mm_realloc(void *ptr, size_t size)
 
 void *mm_malloc(size_t size)
 {
-    size_t asize, i;
-    size_t extend_size;
-    char *bp = NULL;
+    size_t asize; // 实际需要的大小（对齐、最小块）
+    size_t extend_size; // no fit申请新的空间大小
+    char* bp = NULL; // 返回的指针
     char* list = NULL;
+
     if (size == 0) return NULL;
-    
+
+    // 1.搜索bins
+    int bin_num = 0;
     asize = DSIZE * ((size + (DSIZE) + (DSIZE - 1)) / DSIZE);
-    int bin_num;
+    size_t i;
+
+    // 2.选择对应大小范围的bin
 
     for(i = asize, bin_num=0; bin_num<BINS_NUM; bin_num++, i>>=1){
         // 3.first-fit找到合适大小的chunk
         // 首先简单判断筛选大致范围
         if((i>1) || bins[bin_num] == NULL) continue;
+        
         for(list = bins[bin_num]; list; list=BK(list)){
             if(GET_SIZE(HDRP(list)) < asize) continue;
             bp = list;
@@ -291,10 +297,11 @@ void *mm_malloc(size_t size)
         }
         if(bp) break;
     }
-
-    if (!bp) {
-        extend_size = MAX(asize,CHUNKSIZE);
-        if ((bp = extend_heap(extend_size/WSIZE)) == NULL)
+    
+    if(!bp){
+        // 未发现适合回收的空闲内存，开辟新的堆内存
+        extend_size = MAX(asize, CHUNKSIZE);
+        if ((bp = extend_heap(extend_size / WSIZE)) == NULL)
             return NULL;
     }
     replace(bp, asize);
