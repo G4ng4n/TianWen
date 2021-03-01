@@ -52,3 +52,12 @@ archlab的环境在part C又出了问题，明天再看一下，再因为环境�
 malloclab实在没时间搞了=-=，realloc差一个总是过不去
 在搞Windows的ioctl，配环境简直噩梦
 下周要做ida的脚本希望时间足够，还要学渗透了
+
+- 20210228
+
+新的驱动demo思路卡住了，准备符号调试环境
+
+- 20210301
+
+不知道是不是VM版本（用的16）的问题，virtualkd会出现问题，又做了virtualbox的环境。
+额外多了一个CVE-2021-21972 vSphere Client RCE的复现任务
