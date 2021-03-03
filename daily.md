@@ -61,3 +61,7 @@ malloclab实在没时间搞了=-=，realloc差一个总是过不去
 
 不知道是不是VM版本（用的16）的问题，virtualkd会出现问题，又做了virtualbox的环境。
 额外多了一个CVE-2021-21972 vSphere Client RCE的复现任务
+
+- 20210303
+
+本来想继续写驱动，但是写了一天的思维图。需要写一个SMC的demo，找到了一个github上的仿pchunter的源码，准备研究那个了。
