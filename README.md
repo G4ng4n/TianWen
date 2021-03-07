@@ -11,3 +11,4 @@
 - [CSAPP labs实验记录](https://github.com/G4ng4n/CSAPP-learn)
 - [安卓逆向](https://github.com/G4ng4n/Android-Reverse-learn)
 - [IDA x86_64危险函数审计插件](https://github.com/G4ng4n/Android-Reverse-learn)
+- [渗透测试学习与HackTheBox实验](https://github.com/G4ng4n/hack_the_box)
